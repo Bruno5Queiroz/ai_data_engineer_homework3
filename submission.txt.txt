@@ -1,0 +1,4 @@
+GITHUB REPO -> https://github.com/Bruno5Queiroz/ai_data_engineer_homework3
+
+Agent URL -> https://agent-w-7474650156706116.aws.databricksapps.com/
+MCP URL -> https://mcp-server-hello-world-7474650156706116.aws.databricksapps.com
