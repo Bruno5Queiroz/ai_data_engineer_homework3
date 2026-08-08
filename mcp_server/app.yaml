@@ -1,0 +1,11 @@
+# Version: 2.0 - Force rebuild
+command:
+  - "python"
+  - "weather_mcp_server.py"
+
+resources:
+  - name: requirements
+    source:
+      path: ./requirements.txt
+
+env: []

@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Weather Dashboard - Agent Bricks + Open-Meteo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin: 0 0 8px 0;
+      color: #667eea;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+    .controls {
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    button {
+      padding: 8px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #5568d3;
+    }
+    .last-updated {
+      color: #999;
+      font-size: 0.85rem;
+      margin-left: auto;
+    }
+
+    /* Current Weather Grid */
+    .weather-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .weather-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .weather-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .weather-card.selected {
+      border: 2px solid #667eea;
+      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    }
+    .city-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .weather-icon {
+      font-size: 3rem;
+      margin: 12px 0;
+    }
+    .temp {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .temp-unit {
+      font-size: 1rem;
+      color: #999;
+    }
+    .weather-desc {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 8px 0;
+    }
+    .weather-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Forecast Section */
+    .forecast-section {
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #667eea;
+    }
+    .forecast-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .forecast-table th {
+      background: #667eea;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .forecast-table td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+    }
+    .forecast-table tr:last-child td {
+      border-bottom: none;
+    }
+    .forecast-table tr:hover {
+      background: #f9fafb;
+    }
+
+    /* Umbrella Recommendation */
+    .umbrella-section {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .umbrella-section.high-risk {
+      background: linear-gradient(135deg, #ffecd2 0%, #ff9a9e 100%);
+    }
+    .umbrella-section.low-risk {
+      background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+    }
+    .umbrella-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .umbrella-recommendation {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+    .umbrella-reasoning {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* Loading & Error States */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    .error {
+      color: #dc2626;
+      padding: 12px;
+      background: #fee;
+      border-radius: 6px;
+      margin: 8px 0;
+      font-size: 0.9rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .weather-grid {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌦️ Weather Dashboard</h1>
+    <p class="subtitle">
+      Live weather data powered by Open-Meteo API. 
+      The same weather broker used by the Agent Bricks weather assistant.
+    </p>
+
+    <div class="controls">
+      <button id="refresh">🔄 Refresh</button>
+      <span class="last-updated" id="last-updated">Loading...</span>
+    </div>
+
+    <!-- Current Weather Grid -->
+    <div id="weather-grid" class="weather-grid">
+      <div class="loading">Loading weather data...</div>
+    </div>
+
+    <!-- Umbrella Recommendation -->
+    <div id="umbrella-section" class="umbrella-section" style="display: none;">
+      <div class="umbrella-title">☂️ Tomorrow's Umbrella Recommendation</div>
+      <div id="umbrella-content"></div>
+    </div>
+
+    <!-- 5-Day Forecast -->
+    <div class="forecast-section">
+      <div class="section-title">📅 5-Day Forecast</div>
+      <div class="empty-state" id="forecast-placeholder">
+        <div class="empty-state-icon">👆</div>
+        <p>Click on a city above to see its 5-day forecast</p>
+      </div>
+      <table class="forecast-table" id="forecast-table" style="display: none;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Conditions</th>
+            <th>High / Low</th>
+            <th>Rain Chance</th>
+          </tr>
+        </thead>
+        <tbody id="forecast-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const cities = {{ default_cities | tojson }};
+    let selectedCity = null;
+
+    // Weather icon mapping
+    const weatherIcons = {
+      'Clear sky': '☀️',
+      'Mainly clear': '🌤️',
+      'Partly cloudy': '⛅',
+      'Overcast': '☁️',
+      'Foggy': '🌫️',
+      'Light drizzle': '🌦️',
+      'Moderate drizzle': '🌦️',
+      'Light rain': '🌧️',
+      'Moderate rain': '🌧️',
+      'Heavy rain': '⛈️',
+      'Slight snow': '🌨️',
+      'Moderate snow': '❄️',
+      'Heavy snow': '❄️',
+      'Thunderstorm': '⛈️'
+    };
+
+    function getWeatherIcon(description) {
+      for (const [key, icon] of Object.entries(weatherIcons)) {
+        if (description.includes(key)) return icon;
+      }
+      return '🌡️';
+    }
+
+    function formatTemp(celsius, fahrenheit) {
+      return `${celsius}°C <span class="temp-unit">(${fahrenheit}°F)</span>`;
+    }
+
+    function updateLastUpdated() {
+      const now = new Date();
+      document.getElementById('last-updated').textContent = 
+        `Last updated: ${now.toLocaleTimeString()}`;
+    }
+
+    async function loadCurrentWeather() {
+      try {
+        const response = await fetch(`/api/current?cities=${cities.join(',')}`);
+        const data = await response.json();
+        
+        const grid = document.getElementById('weather-grid');
+        grid.innerHTML = '';
+        
+        for (const result of data) {
+          const card = document.createElement('div');
+          card.className = 'weather-card';
+          
+          if (result.success) {
+            const w = result.data;
+            card.innerHTML = `
+              <div class="city-name">${w.location.split(',')[0]}</div>
+              <div class="weather-icon">${getWeatherIcon(w.weather_description)}</div>
+              <div class="temp">${formatTemp(w.temperature_celsius, w.temperature_fahrenheit)}</div>
+              <div class="weather-desc">${w.weather_description}</div>
+              <div class="weather-details">
+                <div class="detail-item">💧 ${w.humidity_percent}%</div>
+                <div class="detail-item">💨 ${w.wind_speed_kmh} km/h</div>
+                <div class="detail-item">🌡️ Feels ${w.feels_like_celsius}°C</div>
+                <div class="detail-item">🌧️ ${w.precipitation_mm} mm</div>
+              </div>
+            `;
+            
+            card.addEventListener('click', () => selectCity(result.city, card));
+          } else {
+            card.innerHTML = `
+              <div class="city-name">${result.city}</div>
+              <div class="error">⚠️ ${result.error}</div>
+            `;
+          }
+          
+          grid.appendChild(card);
+        }
+        
+        updateLastUpdated();
+      } catch (err) {
+        document.getElementById('weather-grid').innerHTML = 
+          `<div class="error">Failed to load weather data: ${err.message}</div>`;
+      }
+    }
+
+    async function selectCity(city, cardElement) {
+      // Update selection
+      selectedCity = city;
+      document.querySelectorAll('.weather-card').forEach(c => c.classList.remove('selected'));
+      cardElement.classList.add('selected');
+      
+      // Load forecast
+      await loadForecast(city);
+      
+      // Load umbrella recommendation
+      await loadUmbrellaRecommendation(city);
+    }
+
+    async function loadForecast(city) {
+      try {
+        const response = await fetch(`/api/forecast?city=${encodeURIComponent(city)}&days=5`);
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+        
+        const data = result.data;
+        const tbody = document.getElementById('forecast-body');
+        tbody.innerHTML = '';
+        
+        for (const day of data.daily_forecast) {
+          const row = document.createElement('tr');
+          const date = new Date(day.date);
+          const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+          
+          row.innerHTML = `
+            <td><strong>${dateStr}</strong></td>
+            <td>${getWeatherIcon(day.weather_description)} ${day.weather_description}</td>
+            <td>${day.temperature_max_celsius}°C / ${day.temperature_min_celsius}°C</td>
+            <td>
+              <span style="color: ${day.precipitation_probability_percent >= 60 ? '#dc2626' : '#666'}">
+                ${day.precipitation_probability_percent}%
+              </span>
+            </td>
+          `;
+          tbody.appendChild(row);
+        }
+        
+        document.getElementById('forecast-placeholder').style.display = 'none';
+        document.getElementById('forecast-table').style.display = 'table';
+      } catch (err) {
+        document.getElementById('forecast-body').innerHTML = 
+          `<tr><td colspan="4" class="error">Failed to load forecast: ${err.message}</td></tr>`;
+      }
+    }
+
+    async function loadUmbrellaRecommendation(city) {
+      try {
+        const response = await fetch(`/api/umbrella?city=${encodeURIComponent(city)}`);
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+        
+        const data = result.data;
+        const section = document.getElementById('umbrella-section');
+        const content = document.getElementById('umbrella-content');
+        
+        // Update styling based on risk
+        section.className = 'umbrella-section';
+        if (data.risk_level === 'HIGH') {
+          section.classList.add('high-risk');
+        } else if (data.risk_level === 'LOW') {
+          section.classList.add('low-risk');
+        }
+        
+        // Format recommendation
+        let icon = '☂️';
+        let recommendationText = data.umbrella_recommendation.replace(/_/g, ' ');
+        if (data.umbrella_recommendation === 'NO_UMBRELLA_NEEDED') {
+          icon = '😎';
+        } else if (data.umbrella_recommendation === 'MAYBE_BRING_UMBRELLA') {
+          icon = '🤔';
+        }
+        
+        content.innerHTML = `
+          <div><strong>${city}</strong> • ${data.date}</div>
+          <div class="umbrella-recommendation">${icon} ${recommendationText}</div>
+          <div style="margin-top: 12px;">
+            <strong>Weather:</strong> ${data.weather_description}<br>
+            <strong>Temperature:</strong> ${data.temperature_max_celsius}°C (${data.temperature_max_fahrenheit}°F)<br>
+            <strong>Rain Chance:</strong> ${data.precipitation_probability_percent}%
+          </div>
+          <div class="umbrella-reasoning">${data.reasoning}</div>
+        `;
+        
+        section.style.display = 'block';
+      } catch (err) {
+        const section = document.getElementById('umbrella-section');
+        section.style.display = 'block';
+        document.getElementById('umbrella-content').innerHTML = 
+          `<div class="error">Failed to load recommendation: ${err.message}</div>`;
+      }
+    }
+
+    // Event listeners
+    document.getElementById('refresh').addEventListener('click', async () => {
+      await loadCurrentWeather();
+      if (selectedCity) {
+        const cards = document.querySelectorAll('.weather-card');
+        const selectedCard = Array.from(cards).find(card => 
+          card.querySelector('.city-name')?.textContent === selectedCity
+        );
+        if (selectedCard) {
+          await selectCity(selectedCity, selectedCard);
+        }
+      }
+    });
+
+    // Initial load
+    loadCurrentWeather();
+
+    // Auto-refresh every 5 minutes
+    setInterval(async () => {
+      await loadCurrentWeather();
+      if (selectedCity) {
+        const cards = document.querySelectorAll('.weather-card');
+        const selectedCard = Array.from(cards).find(card => 
+          card.querySelector('.city-name')?.textContent === selectedCity
+        );
+        if (selectedCard) {
+          await selectCity(selectedCity, selectedCard);
+        }
+      }
+    }, 300000); // 5 minutes
+  </script>
+</body>
+</html>
