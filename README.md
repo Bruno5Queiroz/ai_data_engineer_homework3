@@ -478,7 +478,6 @@ def get_pollen_forecast(location: str) -> dict:
 - **Databricks MCP Documentation:** https://docs.databricks.com/aws/en/agents/mcp-tools/
 - **FastMCP Documentation:** https://gofastmcp.com/
 - **Agent Bricks Documentation:** https://docs.databricks.com/aws/en/agents/
-- **Reference Pattern (Day 3):** `/Workspace/Users/brunotqgfc@gmail.com/Zach_Bootcamp/databricks-lakebase-app-day-3`
 
 ## License
 

@@ -3,7 +3,7 @@
 This document provides **3 complete transcripts** demonstrating the Weather Agent (`agent-w`) successfully calling weather MCP tools and providing answers.
 
 **Agent URL:** https://agent-w-7474650156706116.aws.databricksapps.com/  
-**MCP Server URL:** https://mcp-server-hello-world-7474650156706116.aws.databricksapps.com/mcp
+**MCP Server URL:** https://mcp-server-weather-7474650156706116.aws.databricksapps.com/mcp
 
 ---
 

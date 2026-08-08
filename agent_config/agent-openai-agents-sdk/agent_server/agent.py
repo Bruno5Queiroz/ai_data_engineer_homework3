@@ -32,7 +32,7 @@ NAME = 'agent-w'
 SYSTEM_PROMPT = 'You are a helpful assistant.'
 MODEL = 'databricks-meta-llama-3-3-70b-instruct'
 MCP_SERVERS = [
-    ('mcp-server-hello-world', 'https://mcp-server-hello-world-7474650156706116.aws.databricksapps.com/mcp'),
+    ('mcp-server-weather', 'https://mcp-server-weather-7474650156706116.aws.databricksapps.com/mcp'),
 ]
 
 # END GENERATED

@@ -4,17 +4,14 @@
 
 ### App Details
 
-**App Name:** `mcp-server-hello-world`  
-**App URL:** https://mcp-server-hello-world-7474650156706116.aws.databricksapps.com  
-**MCP Endpoint:** https://mcp-server-hello-world-7474650156706116.aws.databricksapps.com/mcp  
-**Source Code Path:** `/Workspace/Users/brunotqgfc@gmail.com/Zach_Bootcamp/ai_data_engineer_homework3/mcp_server`  
+**App Name:** `mcp-server-weather`  
+**App URL:** https://mcp-server-weather-7474650156706116.aws.databricksapps.com  
+**MCP Endpoint:** https://mcp-server-weather-7474650156706116.aws.databricksapps.com/mcp  
 **Active Deployment:** ✅ Running (ACTIVE state)  
 **Deployment Time:** 2026-08-08 19:55:58 UTC  
 
 ### Source Code Verification
 
-The app `mcp-server-hello-world` is deployed from the directory:  
-`/Workspace/Users/brunotqgfc@gmail.com/Zach_Bootcamp/ai_data_engineer_homework3/mcp_server`
 
 This directory contains the **Weather MCP Server** implementation:
 
@@ -145,13 +142,13 @@ Check for severe weather warnings and alerts.
 
 **Agent Name:** `agent-w`  
 **Agent URL:** https://agent-w-7474650156706116.aws.databricksapps.com/  
-**Connected MCP Server:** `mcp-server-hello-world` (weather MCP server)  
+**Connected MCP Server:** `mcp-server-weather` (weather MCP server)  
 **Agent Config:** `/agent_config/agent-openai-agents-sdk/agent_server/agent.py`  
 
 **MCP Server Connection (agent.py line 34-36):**
 ```python
 MCP_SERVERS = [
-    ('mcp-server-hello-world', 'https://mcp-server-hello-world-7474650156706116.aws.databricksapps.com/mcp'),
+    ('mcp-server-weather', 'https://mcp-server-weather-7474650156706116.aws.databricksapps.com/mcp'),
 ]
 ```
 
@@ -168,4 +165,4 @@ The agent is correctly wired to call the weather MCP server's tools.
 ✅ **API Backend:** Open-Meteo (free, no auth required)  
 
 **Note on Naming:**  
-The Databricks App is named `mcp-server-hello-world` but deploys the **Weather MCP Server** code from the `mcp_server/` directory. The code, functionality, and tools are all weather-related. The app name is a deployment artifact and does not affect functionality.
+The Databricks App is named `mcp-server-weather` but deploys the **Weather MCP Server** code from the `mcp_server/` directory. The code, functionality, and tools are all weather-related. The app name is a deployment artifact and does not affect functionality.
